@@ -7,265 +7,210 @@ import java.util.ListIterator;
 
 public class ListB<E> implements List<E> {
 
-    private static final int DEFAULT_CAPACITY = 10;
-    private E[] elements;
-    private int elementCount;
-
     @SuppressWarnings("unchecked")
-    public ListB() {
-        this.elements = (E[]) new Object[DEFAULT_CAPACITY];
-        this.elementCount = 0;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void growCapacity(int targetCapacity) {
-        int newCapacity = elements.length * 2;
-        if (newCapacity < targetCapacity) {
-            newCapacity = targetCapacity;
-        }
-        E[] newArray = (E[]) new Object[newCapacity];
-        int index = 0;
-        while (index < elementCount) {
-            newArray[index] = elements[index];
-            index++;
-        }
-        elements = newArray;
-    }
+    private E[] elements = (E[]) new Object[10];
+    private int size = 0;
 
     private void ensureCapacity(int minCapacity) {
         if (minCapacity > elements.length) {
-            growCapacity(minCapacity);
+            int newCapacity = elements.length * 3 / 2 + 1;
+            if (newCapacity < minCapacity) {
+                newCapacity = minCapacity;
+            }
+            @SuppressWarnings("unchecked")
+            E[] newElements = (E[]) new Object[newCapacity];
+            System.arraycopy(elements, 0, newElements, 0, size);
+            elements = newElements;
         }
     }
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
-        int index = 0;
-        while (index < elementCount) {
-            stringBuilder.append(elements[index]);
-            if (index < elementCount - 1) {
-                stringBuilder.append(", ");
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < size; i++) {
+            sb.append(elements[i]);
+            if (i < size - 1) {
+                sb.append(", ");
             }
-            index++;
         }
-        stringBuilder.append("]");
-        String resultString = stringBuilder.toString();
-        return resultString;
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override
     public boolean add(E e) {
-        boolean isAdded = true;
-        ensureCapacity(elementCount + 1);
-        elements[elementCount] = e;
-        elementCount++;
-        return isAdded;
+        ensureCapacity(size + 1);
+        elements[size++] = e;
+        return true;
     }
 
     @Override
     public E remove(int index) {
-        if (index < 0 || index >= elementCount) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementCount);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
         E removedElement = elements[index];
-        int shiftIndex = index;
-        while (shiftIndex < elementCount - 1) {
-            elements[shiftIndex] = elements[shiftIndex + 1];
-            shiftIndex++;
+        int numMoved = size - index - 1;
+        if (numMoved > 0) {
+            System.arraycopy(elements, index + 1, elements, index, numMoved);
         }
-        elements[elementCount - 1] = null;
-        elementCount--;
+        elements[--size] = null;
         return removedElement;
     }
 
     @Override
     public int size() {
-        int currentSize = elementCount;
-        return currentSize;
+        return size;
     }
 
     @Override
     public void add(int index, E element) {
-        if (index < 0 || index > elementCount) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementCount);
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-        ensureCapacity(elementCount + 1);
-        int shiftIndex = elementCount;
-        while (shiftIndex > index) {
-            elements[shiftIndex] = elements[shiftIndex - 1];
-            shiftIndex--;
+        ensureCapacity(size + 1);
+        int numMoved = size - index;
+        if (numMoved > 0) {
+            System.arraycopy(elements, index, elements, index + 1, numMoved);
         }
         elements[index] = element;
-        elementCount++;
+        size++;
     }
 
     @Override
     public boolean remove(Object o) {
-        int foundIndex = indexOf(o);
-        boolean isRemoved = false;
-        if (foundIndex >= 0) {
-            remove(foundIndex);
-            isRemoved = true;
+        int index = indexOf(o);
+        if (index >= 0) {
+            remove(index);
+            return true;
         }
-        return isRemoved;
+        return false;
     }
 
     @Override
     public E set(int index, E element) {
-        if (index < 0 || index >= elementCount) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementCount);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-        E previousElement = elements[index];
+        E oldElement = elements[index];
         elements[index] = element;
-        return previousElement;
+        return oldElement;
     }
 
     @Override
     public boolean isEmpty() {
-        boolean isListEmpty = (elementCount == 0);
-        return isListEmpty;
+        return size == 0;
     }
 
     @Override
     public void clear() {
-        int clearIndex = 0;
-        while (clearIndex < elementCount) {
-            elements[clearIndex] = null;
-            clearIndex++;
+        for (int i = 0; i < size; i++) {
+            elements[i] = null;
         }
-        elementCount = 0;
+        size = 0;
     }
 
     @Override
     public int indexOf(Object o) {
-        int resultIndex = -1;
-        int searchIndex = 0;
-        boolean isFound = false;
-        while (searchIndex < elementCount && !isFound) {
-            boolean isMatch = false;
-            if (o == null) {
-                if (elements[searchIndex] == null) {
-                    isMatch = true;
-                }
-            } else {
-                if (o.equals(elements[searchIndex])) {
-                    isMatch = true;
+        if (o == null) {
+            for (int i = 0; i < size; i++) {
+                if (elements[i] == null) {
+                    return i;
                 }
             }
-            if (isMatch) {
-                resultIndex = searchIndex;
-                isFound = true;
+        } else {
+            for (int i = 0; i < size; i++) {
+                if (o.equals(elements[i])) {
+                    return i;
+                }
             }
-            searchIndex++;
         }
-        return resultIndex;
+        return -1;
     }
 
     @Override
     public E get(int index) {
-        if (index < 0 || index >= elementCount) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementCount);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-        E foundElement = elements[index];
-        return foundElement;
+        return elements[index];
     }
 
     @Override
     public boolean contains(Object o) {
-        boolean isContained = (indexOf(o) >= 0);
-        return isContained;
+        return indexOf(o) >= 0;
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        int resultIndex = -1;
-        int searchIndex = elementCount - 1;
-        boolean isFound = false;
-        while (searchIndex >= 0 && !isFound) {
-            boolean isMatch = false;
-            if (o == null) {
-                if (elements[searchIndex] == null) {
-                    isMatch = true;
-                }
-            } else {
-                if (o.equals(elements[searchIndex])) {
-                    isMatch = true;
+        if (o == null) {
+            for (int i = size - 1; i >= 0; i--) {
+                if (elements[i] == null) {
+                    return i;
                 }
             }
-            if (isMatch) {
-                resultIndex = searchIndex;
-                isFound = true;
+        } else {
+            for (int i = size - 1; i >= 0; i--) {
+                if (o.equals(elements[i])) {
+                    return i;
+                }
             }
-            searchIndex--;
         }
-        return resultIndex;
+        return -1;
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        boolean isAllContained = false;
-        return isAllContained;
+        return false;
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        List<E> subListResult = null;
-        return subListResult;
+        return null;
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        ListIterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 
     @Override
     public ListIterator<E> listIterator() {
-        ListIterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        T[] arrayResult = null;
-        return arrayResult;
+        return null;
     }
 
     @Override
     public Object[] toArray() {
-        Object[] arrayResult = new Object[0];
-        return arrayResult;
+        return new Object[0];
     }
 
     @Override
     public Iterator<E> iterator() {
-        Iterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 }

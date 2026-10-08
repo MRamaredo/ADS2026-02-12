@@ -7,83 +7,52 @@ import java.util.ListIterator;
 
 public class ListA<E> implements List<E> {
 
-    private static final int DEFAULT_CAPACITY = 10;
-    private E[] elements;
-    private int elementCount;
-
     @SuppressWarnings("unchecked")
-    public ListA() {
-        this.elements = (E[]) new Object[DEFAULT_CAPACITY];
-        this.elementCount = 0;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void growCapacity(int targetCapacity) {
-        int newCapacity = elements.length * 2;
-        if (newCapacity < targetCapacity) {
-            newCapacity = targetCapacity;
-        }
-        E[] newArray = (E[]) new Object[newCapacity];
-        int index = 0;
-        while (index < elementCount) {
-            newArray[index] = elements[index];
-            index++;
-        }
-        elements = newArray;
-    }
-
-    private void ensureCapacity(int minCapacity) {
-        if (minCapacity > elements.length) {
-            growCapacity(minCapacity);
-        }
-    }
+    private E[] elements = (E[]) new Object[10];
+    private int size = 0;
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
-        int index = 0;
-        while (index < elementCount) {
-            stringBuilder.append(elements[index]);
-            if (index < elementCount - 1) {
-                stringBuilder.append(", ");
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < size; i++) {
+            sb.append(elements[i]);
+            if (i < size - 1) {
+                sb.append(", ");
             }
-            index++;
         }
-        stringBuilder.append("]");
-        String resultString = stringBuilder.toString();
-        return resultString;
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override
     public boolean add(E e) {
-        boolean isAdded = true;
-        ensureCapacity(elementCount + 1);
-        elements[elementCount] = e;
-        elementCount++;
-        return isAdded;
+        if (size == elements.length) {
+            @SuppressWarnings("unchecked")
+            E[] newElements = (E[]) new Object[elements.length * 3 / 2 + 1];
+            System.arraycopy(elements, 0, newElements, 0, size);
+            elements = newElements;
+        }
+        elements[size++] = e;
+        return true;
     }
 
     @Override
     public E remove(int index) {
-        if (index < 0 || index >= elementCount) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementCount);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
         E removedElement = elements[index];
-        int shiftIndex = index;
-        while (shiftIndex < elementCount - 1) {
-            elements[shiftIndex] = elements[shiftIndex + 1];
-            shiftIndex++;
+        int numMoved = size - index - 1;
+        if (numMoved > 0) {
+            System.arraycopy(elements, index + 1, elements, index, numMoved);
         }
-        elements[elementCount - 1] = null;
-        elementCount--;
+        elements[--size] = null;
         return removedElement;
     }
 
     @Override
     public int size() {
-        int currentSize = elementCount;
-        return currentSize;
+        return size;
     }
 
     @Override
@@ -92,20 +61,17 @@ public class ListA<E> implements List<E> {
 
     @Override
     public boolean remove(Object o) {
-        boolean isRemoved = false;
-        return isRemoved;
+        return false;
     }
 
     @Override
     public E set(int index, E element) {
-        E previousElement = null;
-        return previousElement;
+        return null;
     }
 
     @Override
     public boolean isEmpty() {
-        boolean isListEmpty = (elementCount == 0);
-        return isListEmpty;
+        return size == 0;
     }
 
     @Override
@@ -114,91 +80,76 @@ public class ListA<E> implements List<E> {
 
     @Override
     public int indexOf(Object o) {
-        int foundIndex = -1;
-        return foundIndex;
+        return -1;
     }
 
     @Override
     public E get(int index) {
-        E foundElement = null;
-        return foundElement;
+        return null;
     }
 
     @Override
     public boolean contains(Object o) {
-        boolean isContained = false;
-        return isContained;
+        return false;
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        int foundIndex = -1;
-        return foundIndex;
+        return -1;
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        boolean isAllContained = false;
-        return isAllContained;
+        return false;
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        boolean isModified = false;
-        return isModified;
+        return false;
     }
 
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        List<E> subListResult = null;
-        return subListResult;
+        return null;
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        ListIterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 
     @Override
     public ListIterator<E> listIterator() {
-        ListIterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        T[] arrayResult = null;
-        return arrayResult;
+        return null;
     }
 
     @Override
     public Object[] toArray() {
-        Object[] arrayResult = new Object[0];
-        return arrayResult;
+        return new Object[0];
     }
 
     @Override
     public Iterator<E> iterator() {
-        Iterator<E> iteratorResult = null;
-        return iteratorResult;
+        return null;
     }
 }
